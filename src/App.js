@@ -8,6 +8,7 @@ import Todos from "./components/Todos.js"
 
 function App() {
   const [todos, setTodos] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     fetch('http://localhost:3030/jsonstore/todos')
@@ -15,6 +16,7 @@ function App() {
       .then(data => {
         const result = Object.keys(data).map(id => ({ id, ...data[id] }));
         setTodos(result);
+        setIsLoading(false);
       })
   }, []);
 
@@ -22,9 +24,11 @@ function App() {
     setTodos(state => state.map(t => t.id === id ? ({ ...t, isCompleted: !t.isCompleted }) : t));
   }
 
-  const onTodoAdd = (id) => {
+  const onTodoAdd = () => {
     const lastId = Number(todos[todos.length - 1].id);
-    setTodos(state => [...state, { id: lastId + 1, }])
+    const text = prompt('Task name:');
+    const newTask = { id: lastId + 1, text, isCompleted: false };
+    setTodos(state => [newTask, ...state]);
   }
 
   return (
@@ -43,9 +47,10 @@ function App() {
 
           <div className="table-wrapper">
 
-            {/* <Loading /> */}
-
-            <Todos todos={todos} toggleTodoStatus={toggleTodoStatus} />
+            {isLoading
+              ? <Loading />
+              : <Todos todos={todos} toggleTodoStatus={toggleTodoStatus} />
+            }
 
           </div>
         </section>
